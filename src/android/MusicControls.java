@@ -172,7 +172,6 @@ public class MusicControls extends CordovaPlugin {
 		Intent startServiceIntent = new Intent(activity,MusicControlsNotificationKiller.class);
 		startServiceIntent.putExtra("notificationID",this.notificationID);
 		activity.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
-		context.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
 		wakeCon = new ServiceConnection() {
 			@Override
