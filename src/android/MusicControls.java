@@ -115,9 +115,6 @@ public class MusicControls extends CordovaPlugin {
 		final Activity activity = this.cordova.getActivity();
 		final Context context=activity.getApplicationContext();
 
-		// Notification Killer
-		final MusicControlsServiceConnection mConnection = new MusicControlsServiceConnection(activity);
-
 		this.cordovaActivity = activity;
 		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID) {
 			@Override
@@ -172,7 +169,6 @@ public class MusicControls extends CordovaPlugin {
 		Intent startServiceIntent = new Intent(activity,MusicControlsNotificationKiller.class);
 		startServiceIntent.putExtra("notificationID",this.notificationID);
 		activity.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
-		context.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
 		wakeCon = new ServiceConnection() {
 			@Override

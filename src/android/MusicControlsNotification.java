@@ -10,7 +10,6 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
-import java.util.UUID;
 
 import android.util.Log;
 import android.R;
@@ -39,7 +38,7 @@ public class MusicControlsNotification {
 
 	// Public Constructor
 	public MusicControlsNotification(Activity cordovaActivity, int id){
-		this.CHANNEL_ID = UUID.randomUUID().toString();
+		this.CHANNEL_ID ="mscn-channel-id";
 		this.notificationID = id;
 		this.cordovaActivity = cordovaActivity;
 		Context context = cordovaActivity;
@@ -74,42 +73,46 @@ public class MusicControlsNotification {
 		}
 		this.infos = newInfos;
 		this.createBuilder();
+		
 		Notification noti = this.notificationBuilder.build();
 		if (Build.VERSION.SDK_INT < 23) {
 			this.notificationManager.notify(this.notificationID, noti);
+			this.onNotificationUpdated(noti);
+
 			return (Notification) null;
 		}
 		return noti;
-		this.notificationManager.notify(this.notificationID, noti);
-		this.onNotificationUpdated(noti);
 	}
 
 	// Toggle the play/pause button
 	public Notification updateIsPlaying(boolean isPlaying){
 		this.infos.isPlaying=isPlaying;
 		this.createBuilder();
+		
 		Notification noti = this.notificationBuilder.build();
 		if (Build.VERSION.SDK_INT < 23) {
 			this.notificationManager.notify(this.notificationID, noti);
+			this.onNotificationUpdated(noti);
+
 			return (Notification) null;
 		}
 		return noti;
-		this.notificationManager.notify(this.notificationID, noti);
-		this.onNotificationUpdated(noti);
 	}
 
 	// Toggle the dismissable status
 	public Notification updateDismissable(boolean dismissable){
 		this.infos.dismissable=dismissable;
 		this.createBuilder();
+		
 		Notification noti = this.notificationBuilder.build();
 		if (Build.VERSION.SDK_INT < 23) {
 			this.notificationManager.notify(this.notificationID, noti);
+			this.onNotificationUpdated(noti);
+
 			return (Notification) null;
 		}
+		
 		return noti;
-		this.notificationManager.notify(this.notificationID, noti);
-		this.onNotificationUpdated(noti);
 	}
 
 	// Get image from url
