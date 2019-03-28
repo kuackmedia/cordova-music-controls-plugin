@@ -92,7 +92,6 @@ public class MusicControlsNotification {
 		this.infos.dismissable=dismissable;
 		this.createBuilder();
 		Notification noti = this.notificationBuilder.build();
-		Notification noti = this.notificationBuilder.build();
 		if (Build.VERSION.SDK_INT < 23) {
 			this.notificationManager.notify(this.notificationID, noti);
 			return (Notification) null;
