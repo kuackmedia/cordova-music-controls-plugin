@@ -29,10 +29,13 @@
 
 		<config-file target="AndroidManifest.xml" parent="/*">
 			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+			<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<service android:name="com.homerours.musiccontrols.MusicControlsNotificationKiller"></service>
+			<service android:enabled="true" android:exported="false" android:name="com.homerours.musiccontrols.MusicControlsWakeLock" />
 		</config-file>
 
 		<source-file src="src/android/MusicControls.java" target-dir="src/com/homerours/musiccontrols" />
@@ -42,6 +45,8 @@
 		<source-file src="src/android/MusicControlsNotificationKiller.java" target-dir="src/com/homerours/musiccontrols" />
 		<source-file src="src/android/MusicControlsInfos.java" target-dir="src/com/homerours/musiccontrols" />
 		<source-file src="src/android/KillBinder.java" target-dir="src/com/homerours/musiccontrols" />
+		<source-file src="src/android/MusicControlsWakeLock.java" target-dir="src/com/homerours/musiccontrols" />
+		<source-file src="src/android/WakeLockBinder.java" target-dir="src/com/homerours/musiccontrols" />
 	</platform>
 
 	<!-- windows -->
