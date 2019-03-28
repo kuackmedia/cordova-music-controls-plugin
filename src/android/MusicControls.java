@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.app.PendingIntent;
 import android.content.ServiceConnection;
 import android.content.ComponentName;
+import android.app.Notification;
 import android.app.Service;
 import android.os.IBinder;
 import android.os.Bundle;
@@ -52,6 +53,9 @@ public class MusicControls extends CordovaPlugin {
 
 	private MediaSessionCallback mMediaSessionCallback = new MediaSessionCallback();
 
+    private ServiceConnection wakeCon;
+    private WakeLockBinder wakeBinder;
+    private int wakeNotiID = 10897110;
 
 	private void registerBroadcaster(MusicControlsBroadcastReceiver mMessageReceiver){
 		final Context context = this.cordova.getActivity().getApplicationContext();
@@ -131,6 +135,20 @@ public class MusicControls extends CordovaPlugin {
 		Intent startServiceIntent = new Intent(activity,MusicControlsNotificationKiller.class);
 		startServiceIntent.putExtra("notificationID",this.notificationID);
 		activity.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
+
+		wakeCon = new ServiceConnection() {
+			@Override
+			public void onServiceConnected(ComponentName componentName, IBinder binder) {
+				((WakeLockBinder) binder).service.startService(new Intent(context, MusicControlsWakeLock.class));
+				wakeBinder = (WakeLockBinder) binder;
+			}
+
+			@Override
+			public void onServiceDisconnected(ComponentName componentName) {
+			}
+		};
+		Intent startWakeServiceIntent = new Intent(context, MusicControlsWakeLock.class);
+		context.bindService(startWakeServiceIntent, wakeCon, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -146,7 +164,10 @@ public class MusicControls extends CordovaPlugin {
 
 			this.cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
-					notification.updateNotification(infos);
+					Notification noti = notification.updateNotification(infos);
+					if (noti != null) {
+						wakeBinder.service.startForeground(wakeNotiID, noti);
+					}
 					
 					// track title
 					metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, infos.track);
@@ -176,7 +197,11 @@ public class MusicControls extends CordovaPlugin {
 		else if (action.equals("updateIsPlaying")){
 			final JSONObject params = args.getJSONObject(0);
 			final boolean isPlaying = params.getBoolean("isPlaying");
-			this.notification.updateIsPlaying(isPlaying);
+			
+			Notification noti = this.notification.updateIsPlaying(isPlaying);
+			if (noti != null) {
+				wakeBinder.service.startForeground(wakeNotiID, noti);
+			}
 			
 			if(isPlaying)
 				setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
@@ -188,7 +213,10 @@ public class MusicControls extends CordovaPlugin {
 		else if (action.equals("updateDismissable")){
 			final JSONObject params = args.getJSONObject(0);
 			final boolean dismissable = params.getBoolean("dismissable");
-			this.notification.updateDismissable(dismissable);
+			Notification noti = this.notification.updateDismissable(dismissable);
+			if (noti != null) {
+				wakeBinder.service.startForeground(wakeNotiID, noti);
+			}
 			callbackContext.success("success");
 		}
 		else if (action.equals("destroy")){
@@ -210,7 +238,15 @@ public class MusicControls extends CordovaPlugin {
 
 	@Override
 	public void onDestroy() {
-		this.notification.destroy();
+		if (this.wakeCon != null) {
+			wakeBinder.service.stopForeground(true);
+
+			final Context context = this.cordova.getActivity().getApplicationContext();
+			Intent startWakeServiceIntent = new Intent(context, MusicControlsWakeLock.class);
+			context.stopService(startWakeServiceIntent);
+			context.unbindService(this.wakeCon);
+		}
+
 		this.mMessageReceiver.stopListening();
 		this.unregisterMediaButtonEvent();
 		super.onDestroy();

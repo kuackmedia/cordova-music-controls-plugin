@@ -64,7 +64,7 @@ public class MusicControlsNotification {
 	}
 
 	// Show or update notification
-	public void updateNotification(MusicControlsInfos newInfos){
+	public Notification updateNotification(MusicControlsInfos newInfos){
 		// Check if the cover has changed	
 		if (!newInfos.cover.isEmpty() && (this.infos == null || !newInfos.cover.equals(this.infos.cover))){
 			this.getBitmapCover(newInfos.cover);
@@ -76,19 +76,28 @@ public class MusicControlsNotification {
 	}
 
 	// Toggle the play/pause button
-	public void updateIsPlaying(boolean isPlaying){
+	public Notification updateIsPlaying(boolean isPlaying){
 		this.infos.isPlaying=isPlaying;
 		this.createBuilder();
 		Notification noti = this.notificationBuilder.build();
-		this.notificationManager.notify(this.notificationID, noti);
+		if (Build.VERSION.SDK_INT < 23) {
+			this.notificationManager.notify(this.notificationID, noti);
+			return (Notification) null;
+		}
+		return noti;
 	}
 
 	// Toggle the dismissable status
-	public void updateDismissable(boolean dismissable){
+	public Notification updateDismissable(boolean dismissable){
 		this.infos.dismissable=dismissable;
 		this.createBuilder();
 		Notification noti = this.notificationBuilder.build();
-		this.notificationManager.notify(this.notificationID, noti);
+		Notification noti = this.notificationBuilder.build();
+		if (Build.VERSION.SDK_INT < 23) {
+			this.notificationManager.notify(this.notificationID, noti);
+			return (Notification) null;
+		}
+		return noti;
 	}
 
 	// Get image from url
