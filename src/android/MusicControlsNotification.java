@@ -72,7 +72,11 @@ public class MusicControlsNotification {
 		this.infos = newInfos;
 		this.createBuilder();
 		Notification noti = this.notificationBuilder.build();
-		this.notificationManager.notify(this.notificationID, noti);
+		if (Build.VERSION.SDK_INT < 23) {
+			this.notificationManager.notify(this.notificationID, noti);
+			return (Notification) null;
+		}
+		return noti;
 	}
 
 	// Toggle the play/pause button
