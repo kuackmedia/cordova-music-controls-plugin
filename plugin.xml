@@ -29,13 +29,11 @@
 
 		<config-file target="AndroidManifest.xml" parent="/*">
 			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<service android:name="com.homerours.musiccontrols.MusicControlsNotificationKiller"></service>
-		</config-file>
-
-		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<service android:enabled="true" android:exported="false" android:name="com.homerours.musiccontrols.MusicControlsWakeLock" />
 		</config-file>
 
