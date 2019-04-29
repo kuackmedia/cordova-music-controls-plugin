@@ -18,6 +18,8 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import android.util.Log;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.Intent;
@@ -39,6 +41,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.lang.Integer;
 
 public class MusicControls extends CordovaPlugin {
 	private MusicControlsBroadcastReceiver mMessageReceiver;
@@ -53,6 +57,7 @@ public class MusicControls extends CordovaPlugin {
 
 	private MediaSessionCallback mMediaSessionCallback = new MediaSessionCallback();
 
+	private ServiceConnection mConnection;
     private ServiceConnection wakeCon;
     private WakeLockBinder wakeBinder;
     private int wakeNotiID = 10897110;
@@ -125,7 +130,7 @@ public class MusicControls extends CordovaPlugin {
 		}
 
 		// Notification Killer
-		ServiceConnection mConnection = new ServiceConnection() {
+		mConnection = new ServiceConnection() {
 			public void onServiceConnected(ComponentName className, IBinder binder) {
 				((KillBinder) binder).service.startService(new Intent(activity, MusicControlsNotificationKiller.class));
 			}
@@ -134,7 +139,7 @@ public class MusicControls extends CordovaPlugin {
 		};
 		Intent startServiceIntent = new Intent(activity,MusicControlsNotificationKiller.class);
 		startServiceIntent.putExtra("notificationID",this.notificationID);
-		activity.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
+		context.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
 		wakeCon = new ServiceConnection() {
 			@Override
@@ -242,9 +247,22 @@ public class MusicControls extends CordovaPlugin {
 			wakeBinder.service.stopForeground(true);
 
 			final Context context = this.cordova.getActivity().getApplicationContext();
-			Intent startWakeServiceIntent = new Intent(context, MusicControlsWakeLock.class);
-			context.stopService(startWakeServiceIntent);
-			context.unbindService(this.wakeCon);
+            final ActivityManager activityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+            final List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
+            for (RunningServiceInfo runningServiceInfo : services) {
+                final String runningServiceClassName = runningServiceInfo.service.getClassName();
+                if (runningServiceClassName.equals("com.homerours.musiccontrols.MusicControlsWakeLock")){
+                    Intent startWakeServiceIntent = new Intent(context, MusicControlsWakeLock.class);
+                    context.stopService(startWakeServiceIntent);
+                    context.unbindService(this.wakeCon);
+                    this.wakeCon = null;
+                } else if (runningServiceClassName.equals("com.homerours.musiccontrols.MusicControlsNotificationKiller")){
+                    Intent startServiceIntent = new Intent(context, MusicControlsNotificationKiller.class);
+                    startServiceIntent.putExtra("notificationID", this.notificationID);
+                    context.stopService(startServiceIntent);
+                    context.unbindService(mConnection);
+                }
+            }
 		}
 
 		this.mMessageReceiver.stopListening();
@@ -257,6 +275,7 @@ public class MusicControls extends CordovaPlugin {
 		onDestroy();
 		super.onReset();
 	}
+	
 	private void setMediaPlaybackState(int state) {
 		PlaybackStateCompat.Builder playbackstateBuilder = new PlaybackStateCompat.Builder();
 		if( state == PlaybackStateCompat.STATE_PLAYING ) {
