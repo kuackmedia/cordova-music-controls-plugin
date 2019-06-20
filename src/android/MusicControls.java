@@ -34,6 +34,7 @@ import android.os.Build;
 import android.R;
 import android.content.BroadcastReceiver;
 import android.media.AudioManager;
+import android.os.PowerManager;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -43,6 +44,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.lang.Integer;
+
+import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
 
 public class MusicControls extends CordovaPlugin {
 	private MusicControlsBroadcastReceiver mMessageReceiver;
@@ -237,6 +240,22 @@ public class MusicControls extends CordovaPlugin {
 					mMessageReceiver.setCallback(callbackContext);
 				}
 			});
+		}
+		else if (action.equals("disableBatteryOptimization")){
+			String packageName = activity.getPackageName();
+			PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+			if (powerManager.isIgnoringBatteryOptimizations(packageName)) {
+				return false;
+			}
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+				return false;
+			}
+			Intent intent = new Intent();
+			intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+			intent.setData(Uri.parse("package:" + packageName));
+			activity.startActivity(intent);
+
+			callbackContext.success("success");
 		}
 		return true;
 	}
