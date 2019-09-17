@@ -44,6 +44,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.lang.Integer;
+import java.lang.Thread;
+import android.view.View;
 
 import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
 
