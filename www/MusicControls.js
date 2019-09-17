@@ -81,7 +81,16 @@ var musicControls = {
       []
     );
   },
-
+  disableWebViewOptimizations: function(successCallback, errorCallback) {
+    cordova.exec(
+      successCallback,
+      errorCallback,
+      "MusicControls",
+      "disableWebViewOptimizations",
+      []
+    );
+  },
+  
   // Register callback
   subscribe: function(onUpdate) {
     musicControls.updateCallback = onUpdate;

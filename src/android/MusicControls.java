@@ -257,6 +257,25 @@ public class MusicControls extends CordovaPlugin {
 
 			callbackContext.success("success");
 		}
+		else if (action.equals("disableWebViewOptimizations")){
+			Thread thread = new Thread() {
+				public void run() {
+					try {
+						Thread.sleep(1000);
+						activity.runOnUiThread(new Runnable() {
+							public void run() {
+								Log.d("MMC", "runOnUiThread");
+								webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
+							}
+						});
+					} catch (Exception e) {
+						Log.e("MMC", "ERROR: " + e.getMessage());
+					}
+				}
+			};
+			thread.start();
+			callbackContext.success("success");
+		}
 		return true;
 	}
 
@@ -293,6 +312,21 @@ public class MusicControls extends CordovaPlugin {
 	public void onReset() {
 		onDestroy();
 		super.onReset();
+	}
+
+	@Override
+	public void onStop() {
+		Thread thread = new Thread() {
+			public void run() {
+				try {
+					Log.d("MMC", "runOnUiThread");
+					webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
+				} catch (Exception e) {
+					Log.e("MMC", "ERROR: " + e.getMessage());
+				}
+			}
+		};
+		thread.start();
 	}
 	
 	private void setMediaPlaybackState(int state) {
