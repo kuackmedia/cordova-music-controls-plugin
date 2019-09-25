@@ -151,43 +151,36 @@ MusicControlsInfo * musicControlsSettings;
 //So if we want to use the new scrubbing support in the lock screen we must implement dummy handlers
 //for those functions that we already deal with through notifications (play, pause, skip etc)
 //otherwise those remote control actions will be disabled
-- (MPRemoteCommandHandlerStatus) remoteEvent:(MPRemoteCommandEvent *)event {
-    return MPRemoteCommandHandlerStatusSuccess;
+- (void) remoteEvent:(MPRemoteCommandEvent *)event {
+    return;
 }
 
-- (MPRemoteCommandHandlerStatus) nextTrackEvent:(MPRemoteCommandEvent *)event {
+- (void) nextTrackEvent:(MPRemoteCommandEvent *)event {
     NSString * action = @"music-controls-next";
     NSString * jsonAction = [NSString stringWithFormat:@"{\"message\":\"%@\"}", action];
     CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:jsonAction];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:[self latestEventCallbackId]];
-    return MPRemoteCommandHandlerStatusSuccess;
 }
 
-- (MPRemoteCommandHandlerStatus) prevTrackEvent:(MPRemoteCommandEvent *)event {
+- (void) prevTrackEvent:(MPRemoteCommandEvent *)event {
     NSString * action = @"music-controls-previous";
     NSString * jsonAction = [NSString stringWithFormat:@"{\"message\":\"%@\"}", action];
     CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:jsonAction];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:[self latestEventCallbackId]];
-    return MPRemoteCommandHandlerStatusSuccess;
-
 }
 
-- (MPRemoteCommandHandlerStatus) pauseEvent:(MPRemoteCommandEvent *)event {
+- (void) pauseEvent:(MPRemoteCommandEvent *)event {
     NSString * action = @"music-controls-pause";
     NSString * jsonAction = [NSString stringWithFormat:@"{\"message\":\"%@\"}", action];
     CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:jsonAction];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:[self latestEventCallbackId]];
-    return MPRemoteCommandHandlerStatusSuccess;
-
 }
 
-- (MPRemoteCommandHandlerStatus) playEvent:(MPRemoteCommandEvent *)event {
+- (void) playEvent:(MPRemoteCommandEvent *)event {
     NSString * action = @"music-controls-play";
     NSString * jsonAction = [NSString stringWithFormat:@"{\"message\":\"%@\"}", action];
     CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:jsonAction];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:[self latestEventCallbackId]];
-    return MPRemoteCommandHandlerStatusSuccess;
-
 }
 
 //Handle all other remote control events
