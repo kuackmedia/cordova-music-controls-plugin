@@ -63,7 +63,6 @@ var musicControls = {
       [{ dismissable: dismissable }]
     );
   },
-
   destroy: function(successCallback, errorCallback) {
     cordova.exec(
       successCallback,
@@ -73,7 +72,25 @@ var musicControls = {
       []
     );
   },
-
+  disableBatteryOptimization: function(successCallback, errorCallback) {
+    cordova.exec(
+      successCallback,
+      errorCallback,
+      "MusicControls",
+      "disableBatteryOptimization",
+      []
+    );
+  },
+  disableWebViewOptimizations: function(successCallback, errorCallback) {
+    cordova.exec(
+      successCallback,
+      errorCallback,
+      "MusicControls",
+      "disableWebViewOptimizations",
+      []
+    );
+  },
+  
   // Register callback
   subscribe: function(onUpdate) {
     musicControls.updateCallback = onUpdate;
