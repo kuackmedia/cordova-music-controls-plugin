@@ -9,7 +9,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 public class MusicControlsWakeLock extends Service {
