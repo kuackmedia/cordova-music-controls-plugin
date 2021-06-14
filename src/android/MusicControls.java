@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -47,7 +49,9 @@ import java.lang.Integer;
 import java.lang.Thread;
 import android.view.View;
 
+import static android.content.Context.UI_MODE_SERVICE;
 import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
+import android.app.NotificationManager;
 
 public class MusicControls extends CordovaPlugin {
 	private MusicControlsBroadcastReceiver mMessageReceiver;
@@ -66,6 +70,7 @@ public class MusicControls extends CordovaPlugin {
     private ServiceConnection wakeCon;
     private WakeLockBinder wakeBinder;
     private int wakeNotiID = 10897110;
+	private boolean isTvDevice = false;
 
 	private void registerBroadcaster(MusicControlsBroadcastReceiver mMessageReceiver){
 		final Context context = this.cordova.getActivity().getApplicationContext();
@@ -134,6 +139,12 @@ public class MusicControls extends CordovaPlugin {
 			e.printStackTrace();
 		}
 
+		UiModeManager uiModeManager = (UiModeManager) activity.getSystemService(UI_MODE_SERVICE);
+		this.isTvDevice = uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+		if (this.isTvDevice) {
+			return;
+		}
+
 		// Notification Killer
 		mConnection = new ServiceConnection() {
 			public void onServiceConnected(ComponentName className, IBinder binder) {
@@ -165,7 +176,7 @@ public class MusicControls extends CordovaPlugin {
 	public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		final Context context=this.cordova.getActivity().getApplicationContext();
 		final Activity activity=this.cordova.getActivity();
-
+		final boolean isTvDevice = this.isTvDevice;
 		
 		if (action.equals("create")) {
 			final MusicControlsInfos infos = new MusicControlsInfos(args);
@@ -175,7 +186,7 @@ public class MusicControls extends CordovaPlugin {
 			this.cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
 					Notification noti = notification.updateNotification(infos);
-					if (noti != null) {
+					if (noti != null && wakeBinder != null && !isTvDevice) {
 						wakeBinder.service.startForeground(wakeNotiID, noti);
 					}
 					
@@ -209,7 +220,7 @@ public class MusicControls extends CordovaPlugin {
 			final boolean isPlaying = params.getBoolean("isPlaying");
 			
 			Notification noti = this.notification.updateIsPlaying(isPlaying);
-			if (noti != null) {
+			if (noti != null && !isTvDevice) {
 				wakeBinder.service.startForeground(wakeNotiID, noti);
 			}
 			
@@ -224,7 +235,7 @@ public class MusicControls extends CordovaPlugin {
 			final JSONObject params = args.getJSONObject(0);
 			final boolean dismissable = params.getBoolean("dismissable");
 			Notification noti = this.notification.updateDismissable(dismissable);
-			if (noti != null) {
+			if (noti != null && !isTvDevice) {
 				wakeBinder.service.startForeground(wakeNotiID, noti);
 			}
 			callbackContext.success("success");
@@ -266,7 +277,6 @@ public class MusicControls extends CordovaPlugin {
 						Thread.sleep(1000);
 						activity.runOnUiThread(new Runnable() {
 							public void run() {
-								Log.d("MMC", "runOnUiThread");
 								webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
 							}
 						});
@@ -283,10 +293,11 @@ public class MusicControls extends CordovaPlugin {
 
 	@Override
 	public void onDestroy() {
-		if (this.wakeCon != null) {
-			wakeBinder.service.stopForeground(true);
+		final Context context = this.cordova.getActivity().getApplicationContext();
 
-			final Context context = this.cordova.getActivity().getApplicationContext();
+		if (this.wakeCon != null && !this.isTvDevice) {
+			wakeBinder.service.stopForeground(true);
+			
             final ActivityManager activityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
             final List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
             for (RunningServiceInfo runningServiceInfo : services) {
@@ -305,6 +316,9 @@ public class MusicControls extends CordovaPlugin {
             }
 		}
 
+		NotificationManager mNM = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		mNM.cancel(this.notificationID);
+
 		this.mMessageReceiver.stopListening();
 		this.unregisterMediaButtonEvent();
 		super.onDestroy();
@@ -321,7 +335,6 @@ public class MusicControls extends CordovaPlugin {
 		Thread thread = new Thread() {
 			public void run() {
 				try {
-					Log.d("MMC", "runOnUiThread");
 					webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
 				} catch (Exception e) {
 					Log.e("MMC", "ERROR: " + e.getMessage());
