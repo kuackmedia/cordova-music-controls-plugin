@@ -90,6 +90,15 @@ var musicControls = {
       []
     );
   },
+  releaseMediaSession: function(successCallback) {
+    cordova.exec(
+      successCallback,
+      successCallback,
+      "MusicControls",
+      "releaseMediaSession",
+      []
+    );
+  },
   
   // Register callback
   subscribe: function(onUpdate) {
