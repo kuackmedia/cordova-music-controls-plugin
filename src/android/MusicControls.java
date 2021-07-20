@@ -289,7 +289,7 @@ public class MusicControls extends CordovaPlugin {
 			callbackContext.success("success");
 		}
 		else if (action.equals("releaseMediaSession")){
-			if (mediaSessionCompat !== null && mediaSessionCompat.isActive()) {
+			if (mediaSessionCompat != null && mediaSessionCompat.isActive()) {
 				mediaSessionCompat.setActive(false);
 				mediaSessionCompat.release();
 			}
