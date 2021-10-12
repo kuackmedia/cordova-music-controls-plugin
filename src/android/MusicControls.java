@@ -116,17 +116,7 @@ public class MusicControls extends CordovaPlugin {
 		final Context context=activity.getApplicationContext();
 
 		this.cordovaActivity = activity;
-		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID) {
-			@Override
-			protected void onNotificationUpdated(Notification notification) {
-				mConnection.setNotification(notification, this.infos.isPlaying);
-			}
-
-			@Override
-			protected void onNotificationDestroyed() {
-				mConnection.setNotification(null, false);
-			}
-		};
+		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID);
 
 		this.mMessageReceiver = new MusicControlsBroadcastReceiver(this);
 		this.registerBroadcaster(mMessageReceiver);
