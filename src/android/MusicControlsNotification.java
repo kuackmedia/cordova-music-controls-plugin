@@ -10,6 +10,7 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
+import java.util.UUID;
 
 import android.util.Log;
 import android.R;
@@ -32,13 +33,13 @@ public class MusicControlsNotification {
 	private NotificationManager notificationManager;
 	private Notification.Builder notificationBuilder;
 	private int notificationID;
-	private MusicControlsInfos infos;
+	protected MusicControlsInfos infos;
 	private Bitmap bitmapCover;
 	private String CHANNEL_ID;
 
 	// Public Constructor
-	public MusicControlsNotification(Activity cordovaActivity,int id){
-		this.CHANNEL_ID ="cordova-music-channel-id";
+	public MusicControlsNotification(Activity cordovaActivity, int id){
+		this.CHANNEL_ID = UUID.randomUUID().toString();
 		this.notificationID = id;
 		this.cordovaActivity = cordovaActivity;
 		Context context = cordovaActivity;
@@ -47,9 +48,9 @@ public class MusicControlsNotification {
 		// use channelid for Oreo and higher
 		if (Build.VERSION.SDK_INT >= 26) {
 			// The user-visible name of the channel.
-			CharSequence name = "cordova-music-controls-plugin";
+			CharSequence name = "Audio Controls";
 			// The user-visible description of the channel.
-			String description = "cordova-music-controls-plugin notification";
+			String description = "Control Playing Audio";
 
 			int importance = NotificationManager.IMPORTANCE_LOW;
 
@@ -58,9 +59,11 @@ public class MusicControlsNotification {
 			// Configure the notification channel.
 			mChannel.setDescription(description);
 
-			this.notificationManager.createNotificationChannel(mChannel);
-    }
+			// Don't show badges for this channel
+			mChannel.setShowBadge(false);
 
+			this.notificationManager.createNotificationChannel(mChannel);
+    	}
 	}
 
 	// Show or update notification
@@ -77,6 +80,8 @@ public class MusicControlsNotification {
 			return (Notification) null;
 		}
 		return noti;
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
 	}
 
 	// Toggle the play/pause button
@@ -89,6 +94,8 @@ public class MusicControlsNotification {
 			return (Notification) null;
 		}
 		return noti;
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
 	}
 
 	// Toggle the dismissable status
@@ -101,6 +108,8 @@ public class MusicControlsNotification {
 			return (Notification) null;
 		}
 		return noti;
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
 	}
 
 	// Get image from url
@@ -227,8 +236,9 @@ public class MusicControlsNotification {
 
 		//Controls
 		int nbControls=0;
-		/* Previous  */
+
 		if (infos.hasPrev){
+			/* Previous  */
 			nbControls++;
 			Intent previousIntent = new Intent("music-controls-previous");
 			PendingIntent previousPendingIntent = PendingIntent.getBroadcast(context, 1, previousIntent, 0);
@@ -247,15 +257,16 @@ public class MusicControlsNotification {
 			PendingIntent playPendingIntent = PendingIntent.getBroadcast(context, 1, playIntent, 0);
 			builder.addAction(this.getResourceId(infos.playIcon, android.R.drawable.ic_media_play), "", playPendingIntent);
 		}
-		/* Next */
+
 		if (infos.hasNext){
+			/* Next */
 			nbControls++;
 			Intent nextIntent = new Intent("music-controls-next");
 			PendingIntent nextPendingIntent = PendingIntent.getBroadcast(context, 1, nextIntent, 0);
 			builder.addAction(this.getResourceId(infos.nextIcon, android.R.drawable.ic_media_next), "", nextPendingIntent);
 		}
-		/* Close */
 		if (infos.hasClose){
+			/* Close */
 			nbControls++;
 			Intent destroyIntent = new Intent("music-controls-destroy");
 			PendingIntent destroyPendingIntent = PendingIntent.getBroadcast(context, 1, destroyIntent, 0);
@@ -289,5 +300,9 @@ public class MusicControlsNotification {
 
 	public void destroy(){
 		this.notificationManager.cancel(this.notificationID);
+		this.onNotificationDestroyed();
 	}
+
+	protected void onNotificationUpdated(Notification notification) {}
+	protected void onNotificationDestroyed() {}
 }

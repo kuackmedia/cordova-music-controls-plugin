@@ -9,9 +9,9 @@
 #import <Foundation/Foundation.h>
 
 
-#import "MainViewController+MusicControls.h"
+#import "CDVViewController+MusicControls.h"
 
-@implementation MainViewController (MusicControls)
+@implementation CDVViewController (MusicControls)
 
 - (void) remoteControlReceivedWithEvent: (UIEvent *) receivedEvent {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"musicControlsEventNotification" object:receivedEvent];

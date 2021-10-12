@@ -83,6 +83,9 @@ public class MusicControls extends CordovaPlugin {
 
 		// Listen for headset plug/unplug
 		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+		
+		// Listen for bluetooth connection state changes
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter(android.bluetooth.BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
 	}
 
 	// Register pendingIntent for broacast
@@ -112,9 +115,22 @@ public class MusicControls extends CordovaPlugin {
 		final Activity activity = this.cordova.getActivity();
 		final Context context=activity.getApplicationContext();
 
-    		this.cordovaActivity = activity;
+		// Notification Killer
+		final MusicControlsServiceConnection mConnection = new MusicControlsServiceConnection(activity);
 
-		this.notification = new MusicControlsNotification(activity,this.notificationID);
+		this.cordovaActivity = activity;
+		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID) {
+			@Override
+			protected void onNotificationUpdated(Notification notification) {
+				mConnection.setNotification(notification, this.infos.isPlaying);
+			}
+
+			@Override
+			protected void onNotificationDestroyed() {
+				mConnection.setNotification(null, false);
+			}
+		};
+
 		this.mMessageReceiver = new MusicControlsBroadcastReceiver(this);
 		this.registerBroadcaster(mMessageReceiver);
 
@@ -155,6 +171,7 @@ public class MusicControls extends CordovaPlugin {
 		};
 		Intent startServiceIntent = new Intent(activity,MusicControlsNotificationKiller.class);
 		startServiceIntent.putExtra("notificationID",this.notificationID);
+		activity.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
 		context.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
 		wakeCon = new ServiceConnection() {

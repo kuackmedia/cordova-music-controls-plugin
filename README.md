@@ -1,16 +1,25 @@
-# Cordova Music Controls Plugin
+# Cordova Music Controls Plugin 2
 
 <img src='https://imgur.com/fh3ACOq.png' width='564' height='342'>
 
-Music controls for Cordova applications. Display a 'media' notification with play/pause, previous, next buttons, allowing the user to control the play. Handle also headset event (plug, unplug, headset button).
+Music controls for Cordova applications. Display a 'media' notification with play/pause, previous, next buttons, allowing the user to control the play. Handles headset events (plug, unplug, headset button).
+
+This plugin is forked from the original which is no longer maintained but which can be found at:
+https://github.com/homerours/cordova-music-controls-plugin
+
+This plugin is renamed as cordova-plugin-music-controls2 for easy differentiation and to allow for publishing
+updates to npm to make life easier for everyone.
 
 ## Supported platforms
-- Android (4.1+)
+- Android (4.1+) ([homerours](https://github.com/homerours))
 - Windows (10+, by [filfat](https://github.com/filfat))
 - iOS 8+ (by [0505gonzalez](https://github.com/0505gonzalez))
 
 ## Installation
-`cordova plugin add https://github.com/homerours/cordova-music-controls-plugin`
+- Current release
+`cordova plugin add cordova-plugin-music-controls2`
+- Bleeding edge direct from github
+`cordova plugin add https://github.com/ghenry22/cordova-plugin-music-controls2`
 
 ## Methods
 - Create the media controls:
@@ -80,11 +89,10 @@ function events(action) {
 		case 'music-controls-destroy':
 			// Do something
 			break;
-
-		// External controls (iOS only)
     	case 'music-controls-toggle-play-pause' :
 			// Do something
 			break;
+		// Lockscreen seek controls (iOS only)
     	case 'music-controls-seek-to':
 			const seekToInSeconds = JSON.parse(action).position;
 			MusicControls.updateElapsed({
