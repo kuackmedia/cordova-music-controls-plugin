@@ -10,6 +10,7 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Random;
+import java.util.UUID;
 
 import android.util.Log;
 import android.R;
@@ -38,7 +39,7 @@ public class MusicControlsNotification {
 
 	// Public Constructor
 	public MusicControlsNotification(Activity cordovaActivity, int id){
-		this.CHANNEL_ID ="mscn-channel-id";
+		this.CHANNEL_ID = UUID.randomUUID().toString();
 		this.notificationID = id;
 		this.cordovaActivity = cordovaActivity;
 		Context context = cordovaActivity;
@@ -66,43 +67,34 @@ public class MusicControlsNotification {
 	}
 
 	// Show or update notification
-	public Notification updateNotification(MusicControlsInfos newInfos){
+	public void updateNotification(MusicControlsInfos newInfos){
 		// Check if the cover has changed	
 		if (!newInfos.cover.isEmpty() && (this.infos == null || !newInfos.cover.equals(this.infos.cover))){
 			this.getBitmapCover(newInfos.cover);
 		}
 		this.infos = newInfos;
 		this.createBuilder();
-		
 		Notification noti = this.notificationBuilder.build();
 		this.notificationManager.notify(this.notificationID, noti);
 		this.onNotificationUpdated(noti);
-		
-		return noti;
 	}
 
 	// Toggle the play/pause button
-	public Notification updateIsPlaying(boolean isPlaying){
+	public void updateIsPlaying(boolean isPlaying){
 		this.infos.isPlaying=isPlaying;
 		this.createBuilder();
-		
 		Notification noti = this.notificationBuilder.build();
 		this.notificationManager.notify(this.notificationID, noti);
 		this.onNotificationUpdated(noti);
-
-		return noti;
 	}
 
 	// Toggle the dismissable status
-	public Notification updateDismissable(boolean dismissable){
+	public void updateDismissable(boolean dismissable){
 		this.infos.dismissable=dismissable;
 		this.createBuilder();
-		
 		Notification noti = this.notificationBuilder.build();
 		this.notificationManager.notify(this.notificationID, noti);
 		this.onNotificationUpdated(noti);
-		
-		return noti;
 	}
 
 	// Get image from url
@@ -170,14 +162,14 @@ public class MusicControlsNotification {
 			builder.setChannelId(this.CHANNEL_ID);
 		}
 
+		int intentFlags = Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_IMMUTABLE : 0;
+
 		//Configure builder
 		builder.setContentTitle(infos.track);
 		if (!infos.artist.isEmpty()){
 			builder.setContentText(infos.artist);
 		}
 		builder.setWhen(0);
-
-		int intentFlags = android.os.Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_IMMUTABLE : 0;
 
 		// set if the notification can be destroyed by swiping
 		if (infos.dismissable){

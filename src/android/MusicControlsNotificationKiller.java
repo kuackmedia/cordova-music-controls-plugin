@@ -26,14 +26,12 @@ public class MusicControlsNotificationKiller extends Service {
 
 	@Override
 	public void onCreate() {
-		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mNM.cancel(NOTIFICATION_ID);
+		this.removeNotification();
 	}
 
 	@Override
 	public void onDestroy() {
-		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mNM.cancel(NOTIFICATION_ID);
+		this.removeNotification();
 	}
 
 	public void setForeground(Notification notification) {
@@ -46,5 +44,16 @@ public class MusicControlsNotificationKiller extends Service {
 		}
 
 		this.stopForeground(STOP_FOREGROUND_DETACH);
+	}
+
+	@Override
+	public void onTaskRemoved(Intent rootIntent) {
+		this.removeNotification();
+		this.stopSelf();
+	}
+
+	private void removeNotification() {
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		mNM.cancel(NOTIFICATION_ID);
 	}
 }
