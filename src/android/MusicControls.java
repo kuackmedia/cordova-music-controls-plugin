@@ -121,8 +121,6 @@ public class MusicControls extends CordovaPlugin {
 		this.mMessageReceiver = new MusicControlsBroadcastReceiver(this);
 		this.registerBroadcaster(mMessageReceiver);
 
-		Intent headsetIntent = new Intent("music-controls-media-button");
-		this.mediaButtonPendingIntent = PendingIntent.getBroadcast(context, 0, headsetIntent, PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
 		
 		this.mediaSessionCompat = new MediaSessionCompat(context, "cordova-music-controls-media-session", null, this.mediaButtonPendingIntent);
 		this.mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -136,6 +134,8 @@ public class MusicControls extends CordovaPlugin {
 		// Register media (headset) button event receiver
 		try {
 			this.mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+			Intent headsetIntent = new Intent("music-controls-media-button");
+			this.mediaButtonPendingIntent = PendingIntent.getBroadcast(context, 0, headsetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			this.registerMediaButtonEvent();
 		} catch (Exception e) {
 			this.mediaButtonAccess=false;
@@ -160,21 +160,19 @@ public class MusicControls extends CordovaPlugin {
 		startServiceIntent.putExtra("notificationID",this.notificationID);
 		context.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
-		if (Build.VERSION.SDK_INT <= 26) {
-			wakeCon = new ServiceConnection() {
-				@Override
-				public void onServiceConnected(ComponentName componentName, IBinder binder) {
-					((WakeLockBinder) binder).service.startService(new Intent(context, MusicControlsWakeLock.class));
-					wakeBinder = (WakeLockBinder) binder;
-				}
+		wakeCon = new ServiceConnection() {
+			@Override
+			public void onServiceConnected(ComponentName componentName, IBinder binder) {
+				((WakeLockBinder) binder).service.startService(new Intent(context, MusicControlsWakeLock.class));
+				wakeBinder = (WakeLockBinder) binder;
+			}
 
-				@Override
-				public void onServiceDisconnected(ComponentName componentName) {
-				}
-			};
-			Intent startWakeServiceIntent = new Intent(context, MusicControlsWakeLock.class);
-			context.bindService(startWakeServiceIntent, wakeCon, Context.BIND_AUTO_CREATE);
-		}
+			@Override
+			public void onServiceDisconnected(ComponentName componentName) {
+			}
+		};
+		Intent startWakeServiceIntent = new Intent(context, MusicControlsWakeLock.class);
+		context.bindService(startWakeServiceIntent, wakeCon, Context.BIND_AUTO_CREATE);
 	}
 
 	@Override
@@ -225,7 +223,7 @@ public class MusicControls extends CordovaPlugin {
 			final boolean isPlaying = params.getBoolean("isPlaying");
 			
 			Notification noti = this.notification.updateIsPlaying(isPlaying);
-			if (noti != null && wakeBinder != null && !isTvDevice) {
+			if (noti != null && !isTvDevice) {
 				wakeBinder.service.startForeground(wakeNotiID, noti);
 			}
 			
@@ -240,7 +238,7 @@ public class MusicControls extends CordovaPlugin {
 			final JSONObject params = args.getJSONObject(0);
 			final boolean dismissable = params.getBoolean("dismissable");
 			Notification noti = this.notification.updateDismissable(dismissable);
-			if (noti != null && wakeBinder != null && !isTvDevice) {
+			if (noti != null && !isTvDevice) {
 				wakeBinder.service.startForeground(wakeNotiID, noti);
 			}
 			callbackContext.success("success");
@@ -301,10 +299,7 @@ public class MusicControls extends CordovaPlugin {
 		final Context context = this.cordova.getActivity().getApplicationContext();
 
 		if (this.wakeCon != null && !this.isTvDevice) {
-			
-			if (wakeBinder != null) {
-				wakeBinder.service.stopForeground(true);
-			}
+			wakeBinder.service.stopForeground(true);
 			
             final ActivityManager activityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
             final List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
