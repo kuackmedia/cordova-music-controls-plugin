@@ -40,6 +40,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import java.util.List;
+
 public class MusicControls extends CordovaPlugin {
 	private MusicControlsBroadcastReceiver mMessageReceiver;
 	private MusicControlsNotification notification;
@@ -53,6 +57,7 @@ public class MusicControls extends CordovaPlugin {
 
 	private MediaSessionCallback mMediaSessionCallback = new MediaSessionCallback();
 
+	private MusicControlsServiceConnection mConnection;
 
 	private void registerBroadcaster(MusicControlsBroadcastReceiver mMessageReceiver){
 		final Context context = this.cordova.getActivity().getApplicationContext();
@@ -95,10 +100,10 @@ public class MusicControls extends CordovaPlugin {
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
 		final Activity activity = this.cordova.getActivity();
-		final Context context=activity.getApplicationContext();
+		final Context context = activity.getApplicationContext();
 
 		// Notification Killer
-		final MusicControlsServiceConnection mConnection = new MusicControlsServiceConnection(activity);
+		mConnection = new MusicControlsServiceConnection(activity);
 
 		this.cordovaActivity = activity;
 		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID) {
@@ -219,6 +224,21 @@ public class MusicControls extends CordovaPlugin {
 
 	@Override
 	public void onDestroy() {
+		final Activity activity = this.cordova.getActivity();
+		final Context context = activity.getApplicationContext();
+		final ActivityManager activityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+        final List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
+        
+        for (RunningServiceInfo runningServiceInfo : services) {
+            final String runningServiceClassName = runningServiceInfo.service.getClassName();
+            if (runningServiceClassName.equals("com.homerours.musiccontrols.MusicControlsNotificationKiller")){
+                Intent startServiceIntent = new Intent(context, MusicControlsNotificationKiller.class);
+                startServiceIntent.putExtra("notificationID", this.notificationID);
+                context.stopService(startServiceIntent);
+                activity.unbindService(this.mConnection);
+            }
+        }
+
 		this.notification.destroy();
 		this.mMessageReceiver.stopListening();
 		this.unregisterMediaButtonEvent();
