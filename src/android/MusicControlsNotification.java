@@ -75,12 +75,9 @@ public class MusicControlsNotification {
 		this.createBuilder();
 		
 		Notification noti = this.notificationBuilder.build();
-		if (Build.VERSION.SDK_INT < 23) {
-			this.notificationManager.notify(this.notificationID, noti);
-			this.onNotificationUpdated(noti);
-
-			return (Notification) null;
-		}
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
+		
 		return noti;
 	}
 
@@ -90,12 +87,9 @@ public class MusicControlsNotification {
 		this.createBuilder();
 		
 		Notification noti = this.notificationBuilder.build();
-		if (Build.VERSION.SDK_INT < 23) {
-			this.notificationManager.notify(this.notificationID, noti);
-			this.onNotificationUpdated(noti);
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
 
-			return (Notification) null;
-		}
 		return noti;
 	}
 
@@ -105,12 +99,8 @@ public class MusicControlsNotification {
 		this.createBuilder();
 		
 		Notification noti = this.notificationBuilder.build();
-		if (Build.VERSION.SDK_INT < 23) {
-			this.notificationManager.notify(this.notificationID, noti);
-			this.onNotificationUpdated(noti);
-
-			return (Notification) null;
-		}
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
 		
 		return noti;
 	}
