@@ -44,6 +44,10 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import java.util.List;
 
+import android.view.View;
+import android.os.PowerManager;
+import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
+
 public class MusicControls extends CordovaPlugin {
 	private MusicControlsBroadcastReceiver mMessageReceiver;
 	private MusicControlsNotification notification;
@@ -219,6 +223,40 @@ public class MusicControls extends CordovaPlugin {
 				}
 			});
 		}
+		else if (action.equals("disableBatteryOptimization")){
+            String packageName = activity.getPackageName();
+            PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+            if (powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                return false;
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                return false;
+            }
+            Intent intent = new Intent();
+            intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + packageName));
+            activity.startActivity(intent);
+
+            callbackContext.success("success");
+        }
+        else if (action.equals("disableWebViewOptimizations")){
+            Thread thread = new Thread() {
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        activity.runOnUiThread(new Runnable() {
+                            public void run() {
+                                webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e("MMC", "ERROR: " + e.getMessage());
+                    }
+                }
+            };
+            thread.start();
+            callbackContext.success("success");
+        }
 		return true;
 	}
 
