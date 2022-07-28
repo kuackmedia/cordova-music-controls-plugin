@@ -12,6 +12,10 @@ import java.net.URL;
 import java.util.Random;
 import java.util.UUID;
 
+import android.media.Session2Token;
+import android.media.session.MediaSession;
+import android.provider.MediaStore;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.R;
 import android.content.Context;
@@ -25,8 +29,10 @@ import android.os.Build;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.app.Notification.MediaStyle;
 
 import android.app.NotificationChannel;
+import android.util.Log;
 
 public class MusicControlsNotification {
 	private Activity cordovaActivity;
@@ -36,7 +42,8 @@ public class MusicControlsNotification {
 	protected MusicControlsInfos infos;
 	private Bitmap bitmapCover;
 	private String CHANNEL_ID;
-
+	private MediaStyle mediaStyle;
+	private MediaSessionCompat mediaSessionCompat;
 	// Public Constructor
 	public MusicControlsNotification(Activity cordovaActivity, int id){
 		this.CHANNEL_ID = UUID.randomUUID().toString();
@@ -44,6 +51,11 @@ public class MusicControlsNotification {
 		this.cordovaActivity = cordovaActivity;
 		Context context = cordovaActivity;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		this.mediaStyle = new MediaStyle();
+		//this.mediaStyle.setMediaSession(cordovaActivity.getMediaController().getSessionToken());
+
+		Log.v("MediaControllerSession", "Contructor MusicControlsNotification");
+
 
 		// use channelid for Oreo and higher
 		if (Build.VERSION.SDK_INT >= 26) {
@@ -66,6 +78,10 @@ public class MusicControlsNotification {
     	}
 	}
 
+	public void setMediaSessionCompat(MediaSessionCompat mediaSessionCompat) {
+		this.mediaStyle.setMediaSession((MediaSession.Token) mediaSessionCompat.getSessionToken().getToken());
+		this.mediaSessionCompat = mediaSessionCompat;
+	}
 	// Show or update notification
 	public void updateNotification(MusicControlsInfos newInfos){
 		// Check if the cover has changed	
@@ -266,8 +282,11 @@ public class MusicControlsNotification {
 			for (int i = 0; i < nbControls; ++i) {
 				args[i] = i;
 			}
-			builder.setStyle(new Notification.MediaStyle().setShowActionsInCompactView(args));
+			Log.v("MediaControllerSession", "createBuilder");
+			//this.mediaStyle.setMediaSession(this.mediaSessionCompat.getMediaSession());
+			builder.setStyle(this.mediaStyle.setShowActionsInCompactView(args));
 		}
+
 		this.notificationBuilder = builder;
 	}
 
