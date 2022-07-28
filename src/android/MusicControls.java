@@ -129,7 +129,9 @@ public class MusicControls extends CordovaPlugin {
 		this.mediaSessionCompat = new MediaSessionCompat(context, "cordova-music-controls-media-session", null, this.mediaButtonPendingIntent);
 		this.mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
-
+	//	this.notification.setSessionToken(this.mediaSessionCompat.getSessionToken());
+		Log.v("MediaControllerSession", "this.mediaSessionCompat " + this.mediaSessionCompat.getSessionToken().toString());
+		this.notification.setMediaSessionCompat(mediaSessionCompat);
 		setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
 		this.mediaSessionCompat.setActive(true);
 
@@ -164,7 +166,7 @@ public class MusicControls extends CordovaPlugin {
 
 			this.cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
-					notification.updateNotification(infos);
+
 					
 					// track title
 					metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, infos.track);
@@ -172,6 +174,9 @@ public class MusicControls extends CordovaPlugin {
 					metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, infos.artist);
 					//album
 					metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, infos.album);
+
+					//duration
+					metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, infos.duration);
 
 					Bitmap art = getBitmapCover(infos.cover);
 					if(art != null){
@@ -186,7 +191,7 @@ public class MusicControls extends CordovaPlugin {
 						setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
 					else
 						setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
-
+					notification.updateNotification(infos);
 					callbackContext.success("success");
 				}
 			});
