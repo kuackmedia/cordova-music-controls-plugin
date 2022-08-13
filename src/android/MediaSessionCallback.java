@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.view.KeyEvent;
+import android.util.Log;
 
 import org.apache.cordova.CallbackContext;
+
 
 public class MediaSessionCallback extends MediaSessionCompat.Callback {
 
@@ -17,6 +19,7 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback {
 
   @Override
   public void onPlay() {
+    Log.i("MediaSessionCallback", "onPlay ");
     super.onPlay();
     if(this.cb != null) {
       this.cb.success("{\"message\": \"music-controls-play\", \"source\": \"music-controls-media-button-play 1\"}");
@@ -54,6 +57,16 @@ public class MediaSessionCallback extends MediaSessionCompat.Callback {
   @Override
   public void onPlayFromMediaId(String mediaId, Bundle extras) {
     super.onPlayFromMediaId(mediaId, extras);
+  }
+
+  @Override
+  public void onSeekTo(long pos) {
+    Log.i("MediaSessionCallback", "onSeekTo " + pos);
+    super.onSeekTo(pos);
+    if(this.cb != null) {
+      this.cb.success("{\"message\": \"music-controls-seek\", \"pos\": \"" + pos + "\"}");
+      this.cb = null;
+    }
   }
 
   @Override

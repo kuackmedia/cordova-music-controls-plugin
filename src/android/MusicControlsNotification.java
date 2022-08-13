@@ -46,7 +46,8 @@ public class MusicControlsNotification {
 	private MediaSessionCompat mediaSessionCompat;
 	// Public Constructor
 	public MusicControlsNotification(Activity cordovaActivity, int id){
-		this.CHANNEL_ID = UUID.randomUUID().toString();
+		//this.CHANNEL_ID = UUID.randomUUID().toString();
+		this.CHANNEL_ID = "kuackmedia-music-controls";
 		this.notificationID = id;
 		this.cordovaActivity = cordovaActivity;
 		Context context = cordovaActivity;

@@ -199,12 +199,13 @@ public class MusicControls extends CordovaPlugin {
 		else if (action.equals("updateIsPlaying")){
 			final JSONObject params = args.getJSONObject(0);
 			final boolean isPlaying = params.getBoolean("isPlaying");
+			final long position = params.getLong("position");
 			this.notification.updateIsPlaying(isPlaying);
-
+			Log.i("Music controls",  "updateIsPlaying " + position);
 			if(isPlaying)
-				setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
+				setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING, position);
 			else
-				setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
+				setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED, position);
 
 			callbackContext.success("success");
 		}
