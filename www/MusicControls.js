@@ -31,13 +31,16 @@ var musicControls = {
     ]);
   },
 
-  updateIsPlaying: function(isPlaying, successCallback, errorCallback) {
+  updateIsPlaying: function(args, successCallback, errorCallback) {
     cordova.exec(
       successCallback,
       errorCallback,
       "MusicControls",
       "updateIsPlaying",
-      [{ isPlaying: isPlaying }]
+      [{
+        isPlaying: args.isPlaying,
+        position: args.position
+      }]
     );
   },
   updateElapsed: function(args, successCallback, errorCallback) {
