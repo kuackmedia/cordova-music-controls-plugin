@@ -295,9 +295,21 @@ public class MusicControls extends CordovaPlugin {
 		super.onReset();
 	}
 	private void setMediaPlaybackState(int state) {
-		this.setMediaPlaybackState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN);
-		//this.setMediaPlaybackState(state, 20000L);
+		PlaybackStateCompat.Builder playbackstateBuilder = new PlaybackStateCompat.Builder();
+        		if( state == PlaybackStateCompat.STATE_PLAYING ) {
+        			playbackstateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PAUSE | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+        				PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
+        				PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH);
+        			playbackstateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
+        		} else {
+        			playbackstateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+        				PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
+        				PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH);
+        			playbackstateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0);
+        		}
+        		this.mediaSessionCompat.setPlaybackState(playbackstateBuilder.build());
 	}
+	/*
 	private void setMediaPlaybackState(int state, Long position) {
 
 		PlaybackStateCompat.Builder playbackstateBuilder = new PlaybackStateCompat.Builder();
@@ -318,6 +330,7 @@ public class MusicControls extends CordovaPlugin {
             this.mediaSessionCompat.setPlaybackState(playbackstateBuilder.build());
         }
 	}
+	*/
 	// Get image from url
 	private Bitmap getBitmapCover(String coverURL){
 		try{
