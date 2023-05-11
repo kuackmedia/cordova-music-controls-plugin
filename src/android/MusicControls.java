@@ -314,7 +314,9 @@ public class MusicControls extends CordovaPlugin {
 					PlaybackStateCompat.ACTION_SEEK_TO);
 			playbackstateBuilder.setState(state, position, 0);
 		}
-		this.mediaSessionCompat.setPlaybackState(playbackstateBuilder.build());
+		if (this.mediaSessionCompat.isActive()) {
+            this.mediaSessionCompat.setPlaybackState(playbackstateBuilder.build());
+        }
 	}
 	// Get image from url
 	private Bitmap getBitmapCover(String coverURL){
