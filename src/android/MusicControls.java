@@ -49,6 +49,8 @@ import android.os.PowerManager;
 import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
 
 public class MusicControls extends CordovaPlugin {
+	private static final String TAG = "MusicControls";
+
 	private MusicControlsBroadcastReceiver mMessageReceiver;
 	private MusicControlsNotification notification;
 	private MediaSessionCompat mediaSessionCompat;
