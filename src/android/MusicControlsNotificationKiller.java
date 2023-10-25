@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.os.Binder;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.util.Log;
 
 public class MusicControlsNotificationKiller extends Service {
 
@@ -35,10 +36,12 @@ public class MusicControlsNotificationKiller extends Service {
 	}
 
 	public void setForeground(Notification notification) {
+	    Log.v("MusicControls", "setForeground");
 		this.startForeground(this.NOTIFICATION_ID, notification);
 	}
 
 	public void clearForeground() {
+	 Log.v("MusicControls", "stopForeground");
 		if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
 			return;
 		}

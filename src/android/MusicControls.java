@@ -113,11 +113,13 @@ public class MusicControls extends CordovaPlugin {
 		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID) {
 			@Override
 			protected void onNotificationUpdated(Notification notification) {
+			 Log.v("MusicControls", "onNotificationUpdated");
 				mConnection.setNotification(notification, this.infos.isPlaying);
 			}
 
 			@Override
 			protected void onNotificationDestroyed() {
+			  Log.v("MusicControls", "onNotificationDestroyed");
 				mConnection.setNotification(null, false);
 			}
 		};
@@ -130,7 +132,7 @@ public class MusicControls extends CordovaPlugin {
 		this.mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
 	//	this.notification.setSessionToken(this.mediaSessionCompat.getSessionToken());
-		Log.v("MediaControllerSession", "this.mediaSessionCompat " + this.mediaSessionCompat.getSessionToken().toString());
+
 		this.notification.setMediaSessionCompat(mediaSessionCompat);
 		setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
 		this.mediaSessionCompat.setActive(true);
