@@ -113,7 +113,7 @@ public class MusicControls extends CordovaPlugin {
 		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID) {
 			@Override
 			protected void onNotificationUpdated(Notification notification) {
-				mConnection.setNotification(notification, this.infos.isPlaying);
+				mConnection.setNotification(notification, true);
 			}
 
 			@Override
