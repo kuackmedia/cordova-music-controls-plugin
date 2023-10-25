@@ -45,10 +45,10 @@ public class MusicControlsNotification {
 	private MediaStyle mediaStyle;
 	private MediaSessionCompat mediaSessionCompat;
 	// Public Constructor
-	public MusicControlsNotification(Activity cordovaActivity,int id, MediaSessionCompat mediaSession){
-		this.CHANNEL_ID ="cordova-music-channel-id";
+	public MusicControlsNotification(Activity cordovaActivity, int id){
+		//this.CHANNEL_ID = UUID.randomUUID().toString();
+		this.CHANNEL_ID = "kuackmedia-music-controls";
 		this.notificationID = id;
-		this.mediaSessionCompat = mediaSession;
 		this.cordovaActivity = cordovaActivity;
 		Context context = cordovaActivity;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -83,72 +83,36 @@ public class MusicControlsNotification {
 		this.mediaStyle.setMediaSession((MediaSession.Token) mediaSessionCompat.getSessionToken().getToken());
 		this.mediaSessionCompat = mediaSessionCompat;
 	}
-
 	// Show or update notification
 	public void updateNotification(MusicControlsInfos newInfos){
-		// Check if the cover has changed
+		// Check if the cover has changed	
 		if (!newInfos.cover.isEmpty() && (this.infos == null || !newInfos.cover.equals(this.infos.cover))){
 			this.getBitmapCover(newInfos.cover);
 		}
 		this.infos = newInfos;
 		this.createBuilder();
-		this.createNotification();
-	}
-
-	private void createNotification() {
-		final Notification noti = this.notificationBuilder.setSound(null).build();
-    //noti.defaults |= Notification.DEFAULT_SOUND;
-    //noti.defaults |= Notification.DEFAULT_VIBRATE;
-    //noti.defaults |= Notification.DEFAULT_LIGHTS;
-    noti.flags |= Notification.FLAG_AUTO_CANCEL;
-    MusicControlsNotificationKiller killer = killer_service.get();
-		if (killer != null) {
-      if (this.infos.dismissable) {
-        killer.startForeground(0,null);
-      } else {
-        killer.setNotification(noti);
-      }
-		}
+		Notification noti = this.notificationBuilder.build();
 		this.notificationManager.notify(this.notificationID, noti);
-	}
-
-	public void setKillerService(MusicControlsNotificationKiller s) {
-		this.killer_service = new WeakReference<MusicControlsNotificationKiller>(s);
-	}
-
-	private boolean hasNotification() {
-		return this.killer_service != null && this.killer_service.get().getNotification() != null;
+		this.onNotificationUpdated(noti);
+		startForeground(this.notificationID, noti);
 	}
 
 	// Toggle the play/pause button
-	public void updateIsPlaying(boolean isPlaying) {
-		if (isPlaying == this.infos.isPlaying && hasNotification()) {
-			return;  // Not recreate the notification with the same data
-		}
+	public void updateIsPlaying(boolean isPlaying){
 		this.infos.isPlaying=isPlaying;
 		this.createBuilder();
-		this.createNotification();
+		Notification noti = this.notificationBuilder.build();
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
 	}
 
 	// Toggle the dismissable status
-	public void updateDismissable(boolean dismissable) {
-		if (dismissable == this.infos.dismissable && hasNotification()) {
-			return;  // Not recreate the notification with the same data
-		}
+	public void updateDismissable(boolean dismissable){
 		this.infos.dismissable=dismissable;
 		this.createBuilder();
-		this.createNotification();
-	}
-
-	// Toggle the dismissable and play/pause status
-	public void updateIsPlayingDismissable(boolean isPlaying, boolean dismissable){
-		if (dismissable == this.infos.dismissable && isPlaying == this.infos.isPlaying && hasNotification()) {
-			return;  // Not recreate the notification with the same data
-		}
-		this.infos.isPlaying=isPlaying;
-		this.infos.dismissable=dismissable;
-		this.createBuilder();
-		this.createNotification();
+		Notification noti = this.notificationBuilder.build();
+		this.notificationManager.notify(this.notificationID, noti);
+		this.onNotificationUpdated(noti);
 	}
 
 	// Get image from url

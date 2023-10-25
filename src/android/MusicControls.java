@@ -9,7 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.bluetooth.BluetoothDevice;
+import android.app.Notification;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -39,13 +39,16 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import java.util.List;
+
 import android.view.View;
 import android.os.PowerManager;
-
+import static android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS;
 
 public class MusicControls extends CordovaPlugin {
-	private static final String TAG = "MusicControls";
-
 	private MusicControlsBroadcastReceiver mMessageReceiver;
 	private MusicControlsNotification notification;
 	private MediaSessionCompat mediaSessionCompat;
@@ -53,39 +56,44 @@ public class MusicControls extends CordovaPlugin {
 	private AudioManager mAudioManager;
 	private PendingIntent mediaButtonPendingIntent;
 	private boolean mediaButtonAccess=true;
-	private ServiceConnection mConnection;
 
   	private Activity cordovaActivity;
 
 	private MediaSessionCallback mMediaSessionCallback = new MediaSessionCallback();
 
+	private MusicControlsServiceConnection mConnection;
 
 	private void registerBroadcaster(MusicControlsBroadcastReceiver mMessageReceiver){
 		final Context context = this.cordova.getActivity().getApplicationContext();
-		context.registerReceiver(mMessageReceiver, new IntentFilter("music-controls-previous"));
-		context.registerReceiver(mMessageReceiver, new IntentFilter("music-controls-pause"));
-		context.registerReceiver(mMessageReceiver, new IntentFilter("music-controls-play"));
-		context.registerReceiver(mMessageReceiver, new IntentFilter("music-controls-next"));
-		context.registerReceiver(mMessageReceiver, new IntentFilter("music-controls-media-button"));
-		context.registerReceiver(mMessageReceiver, new IntentFilter("music-controls-destroy"));
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-previous"));
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-pause"));
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-play"));
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-next"));
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-media-button"));
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-destroy"));
 
 		// Listen for headset plug/unplug
-		context.registerReceiver(mMessageReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
-                context.registerReceiver(mMessageReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
-                context.registerReceiver(mMessageReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
+
+		// Listen for bluetooth connection state changes
+		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter(android.bluetooth.BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED));
 	}
 
 	// Register pendingIntent for broacast
 	public void registerMediaButtonEvent(){
-		if (this.mediaButtonAccess){
-			this.mAudioManager.registerMediaButtonEventReceiver(this.mediaButtonPendingIntent);
-		}
+
+		this.mediaSessionCompat.setMediaButtonReceiver(this.mediaButtonPendingIntent);
+
+		/*if (this.mediaButtonAccess && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2){
+		this.mAudioManager.registerMediaButtonEventReceiver(this.mediaButtonPendingIntent);
+		}*/
 	}
 
 	public void unregisterMediaButtonEvent(){
-		if (this.mediaButtonAccess){
-			this.mAudioManager.unregisterMediaButtonEventReceiver(this.mediaButtonPendingIntent);
-		}
+		this.mediaSessionCompat.setMediaButtonReceiver(null);
+		/*if (this.mediaButtonAccess && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2){
+		this.mAudioManager.unregisterMediaButtonEventReceiver(this.mediaButtonPendingIntent);
+		}*/
 	}
 
 	public void destroyPlayerNotification(){
@@ -96,21 +104,34 @@ public class MusicControls extends CordovaPlugin {
 	public void initialize(CordovaInterface cordova, CordovaWebView webView) {
 		super.initialize(cordova, webView);
 		final Activity activity = this.cordova.getActivity();
-		final Context context=activity.getApplicationContext();
+		final Context context = activity.getApplicationContext();
 
-    		this.cordovaActivity = activity;
+		// Notification Killer
+		mConnection = new MusicControlsServiceConnection(activity);
 
-		this.mediaSessionCompat = new MediaSessionCompat(context, "cordova-music-controls-media-session", null, this.mediaButtonPendingIntent);
-		this.mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+		this.cordovaActivity = activity;
+		this.notification = new MusicControlsNotification(this.cordovaActivity, this.notificationID) {
+			@Override
+			protected void onNotificationUpdated(Notification notification) {
+				mConnection.setNotification(notification, this.infos.isPlaying);
+			}
 
-		this.notification = new MusicControlsNotification(activity,this.notificationID, mediaSessionCompat);
-		final MusicControlsNotification my_notification = this.notification;
+			@Override
+			protected void onNotificationDestroyed() {
+				mConnection.setNotification(null, false);
+			}
+		};
+
 		this.mMessageReceiver = new MusicControlsBroadcastReceiver(this);
 		this.registerBroadcaster(mMessageReceiver);
 
 
+		this.mediaSessionCompat = new MediaSessionCompat(context, "cordova-music-controls-media-session", null, this.mediaButtonPendingIntent);
+		this.mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
-
+	//	this.notification.setSessionToken(this.mediaSessionCompat.getSessionToken());
+		Log.v("MediaControllerSession", "this.mediaSessionCompat " + this.mediaSessionCompat.getSessionToken().toString());
+		this.notification.setMediaSessionCompat(mediaSessionCompat);
 		setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
 		this.mediaSessionCompat.setActive(true);
 
@@ -120,25 +141,13 @@ public class MusicControls extends CordovaPlugin {
 		try {
 			this.mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 			Intent headsetIntent = new Intent("music-controls-media-button");
-			this.mediaButtonPendingIntent = PendingIntent.getBroadcast(context, 0, headsetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			this.mediaButtonPendingIntent = PendingIntent.getBroadcast(context, 0, headsetIntent, PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
 			this.registerMediaButtonEvent();
 		} catch (Exception e) {
 			this.mediaButtonAccess=false;
 			e.printStackTrace();
 		}
 
-		// Notification Killer
-		mConnection = new ServiceConnection() {
-			public void onServiceConnected(ComponentName className, IBinder binder) {
-				Log.i(TAG, "onServiceConnected");
-				final MusicControlsNotificationKiller service = (MusicControlsNotificationKiller) ((KillBinder) binder).service;
-				my_notification.setKillerService(service);
-				service.startService(new Intent(activity, MusicControlsNotificationKiller.class));
-				Log.i(TAG, "service Started");
-			}
-			public void onServiceDisconnected(ComponentName className) {
-			}
-		};
 		Intent startServiceIntent = new Intent(activity,MusicControlsNotificationKiller.class);
 		startServiceIntent.putExtra("notificationID",this.notificationID);
 		activity.bindService(startServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
@@ -157,7 +166,7 @@ public class MusicControls extends CordovaPlugin {
 
 			this.cordova.getThreadPool().execute(new Runnable() {
 				public void run() {
-					notification.updateNotification(infos);
+
 
 					// track title
 					metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, infos.track);
@@ -165,6 +174,9 @@ public class MusicControls extends CordovaPlugin {
 					metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, infos.artist);
 					//album
 					metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, infos.album);
+
+					//duration
+					metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, infos.duration);
 
 					Bitmap art = getBitmapCover(infos.cover);
 					if(art != null){
@@ -179,7 +191,7 @@ public class MusicControls extends CordovaPlugin {
 						setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
 					else
 						setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
-
+					notification.updateNotification(infos);
 					callbackContext.success("success");
 				}
 			});
@@ -187,12 +199,13 @@ public class MusicControls extends CordovaPlugin {
 		else if (action.equals("updateIsPlaying")){
 			final JSONObject params = args.getJSONObject(0);
 			final boolean isPlaying = params.getBoolean("isPlaying");
+			final long position = params.getLong("position");
 			this.notification.updateIsPlaying(isPlaying);
-
+			Log.i("Music controls",  "updateIsPlaying " + position);
 			if(isPlaying)
-				setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
+				setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING, position);
 			else
-				setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
+				setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED, position);
 
 			callbackContext.success("success");
 		}
@@ -200,13 +213,6 @@ public class MusicControls extends CordovaPlugin {
 			final JSONObject params = args.getJSONObject(0);
 			final boolean dismissable = params.getBoolean("dismissable");
 			this.notification.updateDismissable(dismissable);
-			callbackContext.success("success");
-		}
-		else if (action.equals("updateIsPlayingDismissable")){
-			final JSONObject params = args.getJSONObject(0);
-			final boolean dismissable_2 = params.getBoolean("dismissable");
-			final boolean isPlaying_2 = params.getBoolean("isPlaying");
-			this.notification.updateIsPlayingDismissable(isPlaying_2, dismissable_2);
 			callbackContext.success("success");
 		}
 		else if (action.equals("destroy")){
@@ -223,39 +229,63 @@ public class MusicControls extends CordovaPlugin {
 				}
 			});
 		}
-		else if (action.equals("disableWebViewOptimizations")){
-			Thread thread = new Thread() {
-				public void run() {
-					try {
-						Thread.sleep(1000);
-						activity.runOnUiThread(new Runnable() {
-							public void run() {
-								Log.d("MMC", "runOnUiThread");
-								webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
-							}
-						});
-					} catch (Exception e) {
-						Log.e("MMC", "ERROR: " + e.getMessage());
-					}
-				}
-			};
-			thread.start();
-			callbackContext.success("success");
-		}
+		else if (action.equals("disableBatteryOptimization")){
+            String packageName = activity.getPackageName();
+            PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+            if (powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                return false;
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                return false;
+            }
+            Intent intent = new Intent();
+            intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + packageName));
+            activity.startActivity(intent);
+
+            callbackContext.success("success");
+        }
+        else if (action.equals("disableWebViewOptimizations")){
+            Thread thread = new Thread() {
+                public void run() {
+                    try {
+                        Thread.sleep(1000);
+                        activity.runOnUiThread(new Runnable() {
+                            public void run() {
+                                webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
+                            }
+                        });
+                    } catch (Exception e) {
+                        Log.e("MMC", "ERROR: " + e.getMessage());
+                    }
+                }
+            };
+            thread.start();
+            callbackContext.success("success");
+        }
 		return true;
 	}
 
 	@Override
 	public void onDestroy() {
+		final Activity activity = this.cordova.getActivity();
+		final Context context = activity.getApplicationContext();
+		final ActivityManager activityManager = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+        final List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
+
+        for (RunningServiceInfo runningServiceInfo : services) {
+            final String runningServiceClassName = runningServiceInfo.service.getClassName();
+            if (runningServiceClassName.equals("com.homerours.musiccontrols.MusicControlsNotificationKiller")){
+                Intent startServiceIntent = new Intent(context, MusicControlsNotificationKiller.class);
+                startServiceIntent.putExtra("notificationID", this.notificationID);
+                context.stopService(startServiceIntent);
+                activity.unbindService(this.mConnection);
+            }
+        }
+
 		this.notification.destroy();
 		this.mMessageReceiver.stopListening();
 		this.unregisterMediaButtonEvent();
-		if (mConnection != null) {
-			final Activity activity = this.cordova.getActivity();
-			Intent stopServiceIntent = new Intent(activity, MusicControlsNotificationKiller.class);
-			activity.unbindService(mConnection);
-			activity.stopService(stopServiceIntent);
-		}
 		super.onDestroy();
 	}
 
@@ -264,37 +294,28 @@ public class MusicControls extends CordovaPlugin {
 		onDestroy();
 		super.onReset();
 	}
-
-	@Override
-	public void onStop() {
-		Thread thread = new Thread() {
-			public void run() {
-				try {
-					Log.d("MMC", "runOnUiThread");
-					webView.getEngine().getView().dispatchWindowVisibilityChanged(View.VISIBLE);
-				} catch (Exception e) {
-					Log.e("MMC", "ERROR: " + e.getMessage());
-				}
-			}
-		};
-		thread.start();
-	}
 	private void setMediaPlaybackState(int state) {
+		this.setMediaPlaybackState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN);
+		//this.setMediaPlaybackState(state, 20000L);
+	}
+	private void setMediaPlaybackState(int state, Long position) {
+
 		PlaybackStateCompat.Builder playbackstateBuilder = new PlaybackStateCompat.Builder();
 		if( state == PlaybackStateCompat.STATE_PLAYING ) {
 			playbackstateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PAUSE | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-				PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
-				PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH);
-			playbackstateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
+					PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
+					PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH |
+					PlaybackStateCompat.ACTION_SEEK_TO);
+			playbackstateBuilder.setState(state, position, 1.0f);
 		} else {
 			playbackstateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE | PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_SKIP_TO_NEXT | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-				PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
-				PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH);
-			playbackstateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0);
+					PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
+					PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH |
+					PlaybackStateCompat.ACTION_SEEK_TO);
+			playbackstateBuilder.setState(state, position, 0);
 		}
 		this.mediaSessionCompat.setPlaybackState(playbackstateBuilder.build());
 	}
-
 	// Get image from url
 	private Bitmap getBitmapCover(String coverURL){
 		try{
