@@ -36,8 +36,8 @@ public class MusicControlsNotificationKiller extends Service {
 	}
 
 	public void setForeground(Notification notification) {
-	    Log.v("MusicControls", "setForeground");
-		this.startForeground(this.NOTIFICATION_ID, notification);
+	    Log.v("MusicControls", "setForeground " + this.notificationID);
+		this.startForeground(7824, notification);
 	}
 
 	public void clearForeground() {
@@ -57,6 +57,6 @@ public class MusicControlsNotificationKiller extends Service {
 
 	private void removeNotification() {
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mNM.cancel(NOTIFICATION_ID);
+		mNM.cancel(7824);
 	}
 }
