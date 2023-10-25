@@ -94,7 +94,6 @@ public class MusicControlsNotification {
 		Notification noti = this.notificationBuilder.build();
 		this.notificationManager.notify(this.notificationID, noti);
 		this.onNotificationUpdated(noti);
-		this.notificationManager.startForeground(this.notificationID, noti);
 	}
 
 	// Toggle the play/pause button
