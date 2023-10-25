@@ -122,7 +122,6 @@ public class MusicControls extends CordovaPlugin {
 			}
 		};
 
-        mConnection.setNotification(this.notification, true);
 		this.mMessageReceiver = new MusicControlsBroadcastReceiver(this);
 		this.registerBroadcaster(mMessageReceiver);
 
