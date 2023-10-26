@@ -234,11 +234,12 @@ public class MusicControls extends CordovaPlugin {
             String packageName = activity.getPackageName();
             PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
             if (powerManager.isIgnoringBatteryOptimizations(packageName)) {
-             Log.e("disableBatteryOptimization isIgnoringBatteryOptimizations" + powerManager.isIgnoringBatteryOptimizations(packageName));
+             Log.i("disableBatteryOptimization isIgnoringBatteryOptimizations", powerManager
+             .isIgnoringBatteryOptimizations(packageName));
                 return false;
             }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                Log.e("disableBatteryOptimization version" + Build.VERSION.SDK_INT + " || " + Build.VERSION_CODES.M );
+                Log.i("disableBatteryOptimization version", Build.VERSION.SDK_INT + " || " + Build.VERSION_CODES.M );
                 return false;
             }
             Intent intent = new Intent();
