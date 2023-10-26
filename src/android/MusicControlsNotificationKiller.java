@@ -36,7 +36,6 @@ public class MusicControlsNotificationKiller extends Service {
 	}
 
 	public void setForeground(Notification notification) {
-	    Log.v("MusicControls", "setForeground " + NOTIFICATION_ID);
 		this.startForeground(NOTIFICATION_ID, notification);
 	}
 
