@@ -234,7 +234,7 @@ public class MusicControls extends CordovaPlugin {
             String packageName = activity.getPackageName();
             PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
             if (powerManager.isIgnoringBatteryOptimizations(packageName)) {
-             Log.v("disableBatteryOptimization isIgnoringBatteryOptimizations");
+                Log.v("disableBatteryOptimization", "isIgnoringBatteryOptimizations");
                 return false;
             }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
