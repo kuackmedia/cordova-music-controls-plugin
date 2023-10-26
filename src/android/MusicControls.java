@@ -238,7 +238,7 @@ public class MusicControls extends CordovaPlugin {
                 return false;
             }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                Log.e("disableBatteryOptimization version" + Build.VERSION.SDK_INT + ' || ' + Build.VERSION_CODES.M );
+                Log.e("disableBatteryOptimization version" + Build.VERSION.SDK_INT + " || " + Build.VERSION_CODES.M );
                 return false;
             }
             Intent intent = new Intent();
