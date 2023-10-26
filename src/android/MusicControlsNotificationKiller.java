@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.os.Binder;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.util.Log;
 
 public class MusicControlsNotificationKiller extends Service {
 
