@@ -37,13 +37,14 @@ public class MusicControlsNotificationKiller extends Service {
 
 	public void setForeground(Notification notification) {
 		this.startForeground(NOTIFICATION_ID, notification);
+		Log.i("Music controls startForeground",  "NOTIFICATION_ID " + NOTIFICATION_ID);
 	}
 
 	public void clearForeground() {
 		if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
 			return;
 		}
-
+        Log.i("Music controls stopForeground",  "stopForeground ");
 		this.stopForeground(STOP_FOREGROUND_DETACH);
 	}
 
@@ -56,5 +57,6 @@ public class MusicControlsNotificationKiller extends Service {
 	private void removeNotification() {
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mNM.cancel(NOTIFICATION_ID);
+		Log.i("Music controls removeNotification",  "NOTIFICATION_ID " + NOTIFICATION_ID);
 	}
 }
