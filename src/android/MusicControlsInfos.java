@@ -3,7 +3,7 @@ package com.homerours.musiccontrols;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.util.Log;
 public class MusicControlsInfos{
 	public String artist;
   	public String album;
@@ -25,7 +25,8 @@ public class MusicControlsInfos{
 
 	public MusicControlsInfos(JSONArray args) throws JSONException {
 		final JSONObject params = args.getJSONObject(0);
-		
+		Log.i("MusicControlsInfos hasPrev",  params.getString("hasPrev"));
+		Log.i("MusicControlsInfos hasNext",  params.getString("hasNext"));
 		this.track = params.getString("track");
 		this.artist = params.getString("artist");
     		this.album = params.getString("album");
