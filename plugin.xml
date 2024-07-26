@@ -38,7 +38,23 @@
 		</config-file>
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			<service android:name="com.homerours.musiccontrols.MusicControlsNotificationKiller" android:stopWithTask="true" android:foregroundServiceType="mediaPlayback"></service>
+			<!-- service android:name="com.homerours.musiccontrols.MusicControlsNotificationKiller"
+			android:stopWithTask="true" android:foregroundServiceType="mediaPlayback"></service -->
+			<service
+					android:name="com.homerours.musiccontrols.MusicControlsNotificationKiller"
+					android:stopWithTask="true"
+					android:foregroundServiceType="mediaPlayback"
+					android:exported="false"/>
+
+			<receiver
+					android:name="com.homerours.musiccontrols.MusicControlsBroadcastReceiver"
+					android:exported="true">
+				<intent-filter>
+					<action android:name="com.homerours.musiccontrols.MUSIC_CONTROL_ACTION"/>
+					<!-- Otros filtros de intención si son necesarios -->
+				</intent-filter>
+			</receiver>
+
 		</config-file>
 
 		<framework src="com.android.support:support-v4:28.0.0" />
