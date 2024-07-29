@@ -65,12 +65,13 @@ public class MusicControls extends CordovaPlugin {
 
 	private void registerBroadcaster(MusicControlsBroadcastReceiver mMessageReceiver){
 		final Context context = this.cordova.getActivity().getApplicationContext();
-		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-previous"));
-		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-pause"));
-		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-play"));
-		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-next"));
-		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-media-button"));
-		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-destroy"));
+
+        context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-previous"), new Integer(4));
+        context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-pause"), new Integer(4));
+        context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-play"), new Integer(4));
+        context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-next"), new Integer(4));
+        context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-media-button"), new Integer(4));
+        context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter("music-controls-destroy"), new Integer(4));
 
 		// Listen for headset plug/unplug
 		context.registerReceiver((BroadcastReceiver)mMessageReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
