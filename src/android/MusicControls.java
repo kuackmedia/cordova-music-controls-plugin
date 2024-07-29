@@ -144,6 +144,7 @@ public class MusicControls extends CordovaPlugin {
 		try {
 			this.mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 			Intent headsetIntent = new Intent("music-controls-media-button");
+			headsetIntent.setPackage(context.getPackageName());
 			this.mediaButtonPendingIntent = PendingIntent.getBroadcast(context, 0, headsetIntent, PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
 			this.registerMediaButtonEvent();
 		} catch (Exception e) {
