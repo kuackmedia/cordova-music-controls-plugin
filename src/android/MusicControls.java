@@ -122,7 +122,8 @@ public class MusicControls extends CordovaPlugin {
 			}
 		};
 
-		this.mMessageReceiver = new MusicControlsBroadcastReceiver(this);
+		this.mMessageReceiver = new MusicControlsBroadcastReceiver();
+		this.mMessageReceiver.setMusicControls(this);
 		IntentFilter filter = new IntentFilter();
         filter.addAction("com.homerours.musiccontrols.MUSIC_CONTROL_ACTION");
 		this.registerBroadcaster(mMessageReceiver);
