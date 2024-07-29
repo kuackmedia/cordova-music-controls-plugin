@@ -48,7 +48,7 @@
 
 			<receiver
 					android:name="com.homerours.musiccontrols.MusicControlsBroadcastReceiver"
-					android:exported="true">
+					android:exported="false">
 				<intent-filter>
 					<action android:name="com.homerours.musiccontrols.MUSIC_CONTROL_ACTION"/>
 					<!-- Otros filtros de intención si son necesarios -->
