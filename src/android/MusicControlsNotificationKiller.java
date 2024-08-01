@@ -36,6 +36,9 @@ public class MusicControlsNotificationKiller extends Service {
 	}
 
 	public void setForeground(Notification notification) {
+	    if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            return;
+        }
 		this.startForeground(NOTIFICATION_ID, notification);
 	}
 
