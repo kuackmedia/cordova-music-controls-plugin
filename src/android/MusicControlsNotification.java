@@ -179,8 +179,8 @@ public class MusicControlsNotification {
 			builder.setChannelId(this.CHANNEL_ID);
 		}
 
-		int intentFlags = Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_IMMUTABLE : 0;
-
+		//int intentFlags = Build.VERSION.SDK_INT >= 31 ? PendingIntent.FLAG_IMMUTABLE : 0;
+        int intentFlags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT;  // Only add on platform levels that support FLAG_MUTABLE
 		//Configure builder
 		builder.setContentTitle(infos.track);
 		if (!infos.artist.isEmpty()){
