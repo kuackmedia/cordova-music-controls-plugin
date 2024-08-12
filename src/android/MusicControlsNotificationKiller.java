@@ -42,26 +42,19 @@ public class MusicControlsNotificationKiller extends Service {
     }
 
     public void setForeground(Notification notification) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ActivityManager.RunningAppProcessInfo appProcessInfo = new ActivityManager.RunningAppProcessInfo();
-            ActivityManager.getMyMemoryState(appProcessInfo);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
 
-            // Solo proceder si la aplicación está en primer plano
-            if (appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                createNotificationChannel();
-
-                this.startForeground(NOTIFICATION_ID, notification);
-            } else {
-                // Opcional: manejar la situación si no se puede poner en primer plano
-                Log.w("MusicControlsService", "No se puede iniciar el servicio en primer plano porque la aplicación está en segundo plano.");
-                // Podrías lanzar una notificación que no requiera estar en primer plano aquí, si es necesario.
-            }
-        } else {
-            // Para versiones anteriores a Android 10 (Q), sigue la lógica existente
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel();
-            }
+        try {
             this.startForeground(NOTIFICATION_ID, notification);
+        } catch (android.app.ForegroundServiceStartNotAllowedException e) {
+            // Manejar la excepción específica
+            Log.e("MusicControlsService", "No se puede iniciar el servicio en primer plano: " + e.getMessage());
+            // Opcional: puedes manejar un comportamiento alternativo aquí, como enviar una notificación sin estar en primer plano
+        } catch (Exception e) {
+            // Manejar cualquier otra excepción que pueda ocurrir
+            Log.e("MusicControlsService", "Error al intentar poner en primer plano el servicio: " + e.getMessage());
         }
     }
 
