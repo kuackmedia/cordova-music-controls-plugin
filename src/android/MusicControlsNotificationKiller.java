@@ -82,7 +82,7 @@ public class MusicControlsNotificationKiller extends Service {
             NotificationChannel serviceChannel = new NotificationChannel(
                     CHANNEL_ID,
                     "Music Controls Service Channel",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_HIGH
             );
             mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             if (mNM != null) {
