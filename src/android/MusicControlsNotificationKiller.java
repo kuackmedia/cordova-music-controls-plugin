@@ -43,7 +43,7 @@ public class MusicControlsNotificationKiller extends Service {
 
     public void setForeground(Notification notification) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel();
+           // createNotificationChannel();
         }
 
         try {
