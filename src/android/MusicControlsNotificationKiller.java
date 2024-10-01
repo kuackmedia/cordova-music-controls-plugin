@@ -47,14 +47,11 @@ public class MusicControlsNotificationKiller extends Service {
         }
 
         try {
+            Log.v("MusicControlsService", "Poniendo en primer plano el servicio " + notification.toString());
             this.startForeground(NOTIFICATION_ID, notification);
-        } catch (android.app.ForegroundServiceStartNotAllowedException e) {
-            // Manejar la excepción específica
-            Log.e("MusicControlsService", "No se puede iniciar el servicio en primer plano: " + e.getMessage());
-            // Opcional: puedes manejar un comportamiento alternativo aquí, como enviar una notificación sin estar en primer plano
-        } catch (Exception e) {
+        }  catch (Exception e) {
             // Manejar cualquier otra excepción que pueda ocurrir
-            Log.e("MusicControlsService", "Error al intentar poner en primer plano el servicio: " + e.getMessage());
+            Log.v("MusicControlsService", "Error al intentar poner en primer plano el servicio: " + e.getMessage());
         }
     }
 
