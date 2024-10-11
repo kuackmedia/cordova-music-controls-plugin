@@ -65,7 +65,7 @@ public class MusicControlsNotification {
 			// The user-visible description of the channel.
 			String description = "Control Playing Audio";
 
-			int importance = NotificationManager.IMPORTANCE_HIGH;
+			int importance = NotificationManager.IMPORTANCE_LOW;
 
 			NotificationChannel mChannel = new NotificationChannel(this.CHANNEL_ID, name,importance);
 
