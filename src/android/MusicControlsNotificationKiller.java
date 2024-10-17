@@ -48,7 +48,12 @@ public class MusicControlsNotificationKiller extends Service {
 
         try {
             Log.v("MusicControlsService", "Poniendo en primer plano el servicio " + notification.toString());
-            this.startForeground(NOTIFICATION_ID, notification);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+               // ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+                this.startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+            } else {
+                this.startForeground(NOTIFICATION_ID, notification);
+            }
         }  catch (Exception e) {
             // Manejar cualquier otra excepción que pueda ocurrir
             Log.v("MusicControlsService", "Error al intentar poner en primer plano el servicio: " + e.getMessage());
