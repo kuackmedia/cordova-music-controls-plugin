@@ -49,7 +49,7 @@ public class MusicControlsNotificationKiller extends Service {
         try {
             Log.v("MusicControlsService", "Poniendo en primer plano el servicio " + notification.toString());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-               // ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+               // ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
                 this.startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             } else {
                 this.startForeground(NOTIFICATION_ID, notification);
