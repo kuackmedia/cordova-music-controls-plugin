@@ -10,6 +10,7 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import androidx.core.app.NotificationCompat;
 import android.util.Log;
+import android.content.pm.ServiceInfo;
 
 public class MusicControlsNotificationKiller extends Service {
 
