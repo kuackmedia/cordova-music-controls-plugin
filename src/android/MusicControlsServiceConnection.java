@@ -15,10 +15,15 @@ public class MusicControlsServiceConnection implements ServiceConnection {
         this.activity = activity;
     }
 
-    public void onServiceConnected(ComponentName className, IBinder binder) {
-        service = ((KillBinder) binder).service;
-        service.startService(new Intent(activity, MusicControlsNotificationKiller.class));
-    }
+   public void onServiceConnected(ComponentName className, IBinder binder) {
+       service = ((KillBinder) binder).service;
+       Intent serviceIntent = new Intent(activity, MusicControlsNotificationKiller.class);
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+           activity.startForegroundService(serviceIntent);
+       } else {
+           activity.startService(serviceIntent);
+       }
+   }
 
     public void onServiceDisconnected(ComponentName className) {
     }

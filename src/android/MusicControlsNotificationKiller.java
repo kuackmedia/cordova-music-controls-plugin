@@ -11,7 +11,6 @@ import android.content.Intent;
 import androidx.core.app.NotificationCompat;
 import android.util.Log;
 import android.content.pm.ServiceInfo;
-
 public class MusicControlsNotificationKiller extends Service {
 
     private static int NOTIFICATION_ID;
@@ -21,7 +20,7 @@ public class MusicControlsNotificationKiller extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        this.NOTIFICATION_ID = intent.getIntExtra("notificationID", 1);
+        NOTIFICATION_ID = intent.getIntExtra("notificationID", 1);
         return mBinder;
     }
 
@@ -43,14 +42,12 @@ public class MusicControlsNotificationKiller extends Service {
     }
 
     public void setForeground(Notification notification) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-           // createNotificationChannel();
-        }
 
+        this.createNotificationChannel();
         try {
             Log.v("MusicControlsService", "Poniendo en primer plano el servicio " + notification.toString());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-               // ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                Log.v("MusicControlsService", "Poniendo en primer plano el servicio ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK ");
                 this.startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             } else {
                 this.startForeground(NOTIFICATION_ID, notification);
