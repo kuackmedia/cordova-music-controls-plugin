@@ -39,7 +39,7 @@
 
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<!-- service android:name="com.homerours.musiccontrols.MusicControlsNotificationKiller"
-			android:stopWithTask="true" android:foregroundServiceType="mediaPlayback"></service -->
+			android:stopWithTask="true" android:foregroundServiceType="mediaPlayback"></service // -->
 			<service
 					android:name="com.homerours.musiccontrols.MusicControlsNotificationKiller"
 					android:stopWithTask="true"
