@@ -6,6 +6,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Build;
 
 public class MusicControlsServiceConnection implements ServiceConnection {
     protected MusicControlsNotificationKiller service;
@@ -15,15 +16,15 @@ public class MusicControlsServiceConnection implements ServiceConnection {
         this.activity = activity;
     }
 
-   public void onServiceConnected(ComponentName className, IBinder binder) {
-       service = ((KillBinder) binder).service;
-       Intent serviceIntent = new Intent(activity, MusicControlsNotificationKiller.class);
-       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-           activity.startForegroundService(serviceIntent);
-       } else {
-           activity.startService(serviceIntent);
-       }
-   }
+    public void onServiceConnected(ComponentName className, IBinder binder) {
+        service = ((KillBinder) binder).service;
+        Intent serviceIntent = new Intent(activity, MusicControlsNotificationKiller.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            activity.startForegroundService(serviceIntent);
+        } else {
+            activity.startService(serviceIntent);
+        }
+    }
 
     public void onServiceDisconnected(ComponentName className) {
     }
