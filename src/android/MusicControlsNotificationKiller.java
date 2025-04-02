@@ -43,18 +43,27 @@ public class MusicControlsNotificationKiller extends Service {
     }
 
     public void setForeground(Notification notification) {
-
         try {
-            Log.v("MusicControlsService", "Poniendo en primer plano el servicio " + notification.toString());
+            // Intentar iniciar el servicio en foreground independientemente de si la app está en primer plano o no
+            Log.v("MusicControlsService", "Iniciando servicio foreground");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-               // ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                // ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
                 this.startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             } else {
                 this.startForeground(NOTIFICATION_ID, notification);
             }
-        }  catch (Exception e) {
-            // Manejar cualquier otra excepción que pueda ocurrir
+        } catch (Exception e) {
+            // Si falla, intentamos mostrar la notificación sin foreground
             Log.v("MusicControlsService", "Error al intentar poner en primer plano el servicio: " + e.getMessage());
+            try {
+                // Mostrar la notificación aunque sea sin foreground
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                if (notificationManager != null) {
+                    notificationManager.notify(NOTIFICATION_ID, notification);
+                }
+            } catch (Exception ex) {
+                Log.v("MusicControlsService", "Error también al mostrar notificación normal: " + ex.getMessage());
+            }
         }
     }
 
